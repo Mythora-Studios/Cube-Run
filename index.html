@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cube Run</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.0/dist/phaser.min.js"></script>
+    <style>
+
+        .startScren {
+           display: block;
+           width: 325px;
+           height: 20px;
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+        }
+
+        .gameContainer {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .startGamme {
+            background: linear-gradient(to bottom, #ec5be5, #e02ed1);
+            color: rgb(255, 255, 255);
+            padding: 15px 0; 
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 0 15px 5px #ec5be5;
+            border: 5px solid #ffffff;
+            font-weight: bold;
+            font-size: 26px;
+            width: 320px; 
+            text-align: center;
+            box-sizing: border-box;
+            transition: transform 0.1s ease;
+        }
+
+        .startGamme:hover {
+            transform: scale(1.05);
+        }
+
+        .settingButton {
+             background: linear-gradient(to bottom, #ec5be5, #e02ed1);
+            color: rgb(255, 255, 255);
+            padding: 15px 0; /* Oben/Unten Abstand, Breite wird über width geregelt */
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 0 15px 5px #ec5be5;
+            border: 5px solid #ffffff;
+            font-weight: bold;
+            font-size: 26px;
+            width: 320px; /* Feste Breite für alle Buttons */
+            text-align: center;
+            box-sizing: border-box;
+            transition: transform 0.1s ease;
+        }
+
+        .settingButton:hover {
+            transform: scale(1.05);
+        }
+
+        body {
+            background: blue;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; /* Verhindert Scrollbalken */
+        }            
+
+        .optionsStart {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-direction: column;
+            width: 300px;
+        }
+
+        .BackButton {
+            background-color: #ec5be5;
+            color: white;
+            font-weight: bold;
+            font-size: 15px;
+            padding: 8px 15px;
+            border: 3px solid white;
+            border-radius: 7px;
+            box-shadow: 0 0 15px 5px white;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+        }
+
+        .color-cube-text {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900; /* ExtraBold / Black */
+            font-size: 4rem;
+            text-transform: uppercase;
+            color: #FFDE59; /* Gelbe Textfarbe */
+  
+            padding: 20px;
+  
+             /* Erzeugt den orangen 3D-Schlagschatten */
+            text-shadow: 
+                1px 1px 0px #FF914D,
+                2px 2px 0px #FF914D,
+                3px 3px 0px #FF914D,
+                4px 4px 0px #FF914D,
+                5px 5px 0px #FF914D;
+
+            position: absolute;
+            top: 150px;
+        }
+
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap" rel="stylesheet">  
+    
+ </head>
+<body>
+     <h1 class="color-cube-text">Cube Craft</h1>
+    <div class="startScren" id="startScren">
+         <button class="startGamme">Start Game</button>
+        <div class="optionsStart">
+            <button class="settingButton">Settings</button>
+            <button class="settingButton">Skins</button>
+        </div>
+    </div>
+
+    <div class="gameContainer" id="gameContainer">
+        <button id="BackButton" class="BackButton">Back Button</button>
+    </div>
+
+    <div class="settinContainer" id="settingContainer">
+        <button class="BackButton" id="BackButton2" style="visibility: hidden;">Back Button</button>
+    </div>
+
+    <script>
+
+
+
+        const startScren = document.getElementById('startScren');
+        const startGameButton = document.querySelector('.startGamme');
+        const Backbutton = document.getElementById("BackButton")
+        const gameContainer = document.querySelector('.gameContainer');
+
+
+        // Show the start screen when the page loads
+        window.addEventListener('load', () => {
+            startScren.style.display = 'block';
+        });
+
+        // Add event listener to the start game button
+        startGameButton.addEventListener('click', () => {
+            // Hide the start screen and start the game
+            startScren.style.display = 'none';
+            gameContainer.style.display = 'block';
+            // You can add your game initialization code here
+            console.log('Game started!');
+        });
+
+        Backbutton.addEventListener('click', () => {
+            startScren.style.display = 'block';
+            document.querySelector('.gameContainer').style.display = 'none';
+        });
+
+        // Konfiguration des Spiels
+        const config = {
+            type: Phaser.AUTO,
+            parent: 'gameContainer',
+            scale: {
+                mode: Phaser.Scale.RESIZE,
+                autoCenter: Phaser.Scale.CENTER_BOTH,
+                width: 1280,
+                height: 720,
+            },
+  
+            backgroundColor: "000000",
+            
+            display: {
+                parent: 'app',
+            },
+            
+            physics: {
+                default: 'arcade'
+            },
+            
+            scene: {
+                preload: preload,
+                create: create,
+            }
+        };
+
+        function preload() {
+            // Lade das Bild 'wuerfel.png' aus dem Ordner 'assets' 
+            // und nenne es im Code ab jetzt 'spielerTex'
+            this.load.image('spielerTex', 'playerSkin.png');
+        }
+
+        function create() {
+            // Platziere den geladenen 'spielerTex' an Position X=100, Y=300 auf dem Bildschirm und speichere ihn in er Variable 'player'
+            player = this.physics.add.sprite(100, 300, 'spielerTex');
+  
+            // Aktiviere die Pfeiltasten
+            cursors = this.input.keyboard.createCursorKeys();
+        }
+
+        // ERST DIESE ZEILE STARTET Das L:
+const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>
