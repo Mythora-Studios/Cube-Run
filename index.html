@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cube Run</title>
+    <!-- KORREKTUR: Phaser JS Bibliothek richtig einbinden -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+    
+    <style>
+        body {
+            background: blue;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        } 
+
+        .startScren {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 320px;
+            z-index: 5;
+        }
+
+        .gameContainer {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 2;
+            transition: opacity 0.2s ease;
+        }
+
+        .gameContainer.aktiv {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .startGamme, .settingButton {
+            background: linear-gradient(to bottom, #ec5be5, #e02ed1);
+            color: rgb(255, 255, 255);
+            padding: 15px 0;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 0 15px 5px #ec5be5;
+            border: 5px solid #ffffff;
+            font-weight: bold;
+            font-size: 26px;
+            width: 320px;
+            text-align: center;
+            box-sizing: border-box;
+            transition: transform 0.1s ease;
+            margin-bottom: 10px;
+        }
+
+        .startGamme:hover, .settingButton:hover {
+            transform: scale(1.05);
+        }
+
+        .optionsStart {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-direction: column;
+            width: 320px;
+        }
+
+        .BackButton {
+            background-color: #ec5be5;
+            color: white;
+            font-weight: bold;
+            font-size: 15px;
+            padding: 8px 15px;
+            border: 3px solid white;
+            border-radius: 7px;
+            box-shadow: 0 0 15px 5px white;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .color-cube-text {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            font-size: 4rem;
+            text-transform: uppercase;
+            color: #FFDE59;
+            padding: 0;
+            margin: 0 0 30px 0;
+            text-shadow: 
+                1px 1px 0px #FF914D,
+                2px 2px 0px #FF914D,
+                3px 3px 0px #FF914D,
+                4px 4px 0px #FF914D,
+                5px 5px 0px #FF914D;
+            text-align: center;
+            z-index: 5;
+        }
+
+        .settinContainer, .skinContainer {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 255, 0.9);
+            z-index: 8;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .settings-content, .skins-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            border: 3px solid white;
+        }
+
+        .settings-content label {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .settings-content input[type="range"] {
+            width: 250px;
+            cursor: pointer;
+        }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap" rel="stylesheet">  
+</head>
+<body>
+
+    <h1 class="color-cube-text" id="mainTitle">Cube Craft</h1>
+
+    <div class="startScren" id="startScren">
+        <button class="startGamme">Start Game</button>
+        <div class="optionsStart">
+            <button class="settingButton" id="openSettingsBtn">Settings</button>
+            <button class="settingButton" id="openSkinsBtn">Skins</button>
+        </div>
+    </div>
+
+    <div class="gameContainer" id="gameContainer">
+        <button id="BackButton" class="BackButton">Back Button</button>
+    </div>
+
+    <div class="settinContainer" id="settingContainer">
+        <button class="BackButton" id="BackButton2">Back Button</button>
+        <div class="settings-content">
+            <label for="lautstärke">Lautstärke</label>
+            <input type="range" id="lautstärke" name="lautstärke" min="0" max="1" step="0.01" value="0.5">
+        </div>
+    </div>
+
+    <div class="skinContainer" id="skinContainer">
+        <button class="BackButton" id="BackButton3">Back Button</button>
+        <div class="skins-content">
+            <img src="spielerSkin.png" alt="Spieler Skin" class="skin-image">
+        </div>
+    </div>
+
+    <audio id="bg-music" preload="auto"></audio>   
+
+    <script>
+        const startScren = document.getElementById('startScren');
+        const startGameButton = document.querySelector('.startGamme');
+        const Backbutton = document.getElementById("BackButton");
+        const gameContainer = document.getElementById('gameContainer');
+        const settingContainerBackButton = document.getElementById('BackButton2');
+        const settingContainer = document.getElementById('settingContainer');
+        const settingsButton = document.getElementById('openSettingsBtn');
+        const colorCubeText = document.getElementById('mainTitle');
+        const skinsButton = document.getElementById("openSkinsBtn");
+        const skinContainer = document.getElementById("skinContainer");
+        const skinContainerBackButton = document.getElementById("BackButton3");
+
+        const regler = document.getElementById("lautstärke");
+        const audioPlayer = document.getElementById("bg-music");
+
+        const playlist = [
+            "hinterfgrund.mp3",
+            "Song2.mp3",
+            "Song3.mp3",
+            "Song4.mp3",
+            "Song5.mp3"
+        ];
+
+        // Lautstärke laden
+        const gespeicherteLautstaerke = localStorage.getItem('spielLautstaerke');
+        if (gespeicherteLautstaerke !== null) {
+            const vol = parseFloat(gespeicherteLautstaerke);
+            audioPlayer.volume = vol;
+            regler.value = vol;
+        } else {
+            audioPlayer.volume = 0.5;
+            regler.value = 0.5;
+        }
+
+        // Event-Listener Navigation
+        startGameButton.addEventListener('click', () => {
+            startScren.style.display = 'none';
+            colorCubeText.style.display = 'none';
+            gameContainer.classList.add('aktiv');
+        });
+
+        Backbutton.addEventListener('click', () => {
+            startScren.style.display = 'flex';
+            colorCubeText.style.display = 'block';
+            gameContainer.classList.remove('aktiv');
+        });
+
+        settingsButton.addEventListener("click", () => {
+            startScren.style.display = 'none';
+            colorCubeText.style.display = 'none';
+            settingContainer.style.display = 'flex';
+        });
+
+        settingContainerBackButton.addEventListener("click", () => {
+            startScren.style.display = 'flex';
+            colorCubeText.style.display = 'block';
+            settingContainer.style.display = 'none';
+        });
+
+        skinsButton.addEventListener("click", () => {
+            startScren.style.display = "none";
+            colorCubeText.style.display = "none";
+            skinContainer.style.display = "flex";
+        });
+
+        skinContainerBackButton.addEventListener("click", () => {
+            startScren.style.display = "flex";
+            colorCubeText.style.display = "block";
+            skinContainer.style.display = "none";
+        });
+
+        // Musik-Funktionen
+        function setupNextSong() {
+            const randomIndex = Math.floor(Math.random() * playlist.length);
+            audioPlayer.src = playlist[randomIndex];
+            audioPlayer.volume = parseFloat(regler.value);
+        }
+
+        function playMusic() {
+            if (!audioPlayer.src) {
+                setupNextSong();
+            }
+            audioPlayer.play().catch(e => console.log("Autoplay blockiert:", e));
+        }
+
+        // Song wechseln, sobald einer endet
+        audioPlayer.addEventListener("ended", () => {
+            setupNextSong();
+            audioPlayer.play();
+        });
+
+        // Musik startet beim ersten Klick irgendwo auf der Seite
+        window.addEventListener("click", () => {
+            playMusic();
+        }, { once: true });
+
+        // Lautstärke-Regler
+        regler.addEventListener("input", (event) => {
+            const aktuellerWert = event.target.value;
+            audioPlayer.volume = parseFloat(aktuellerWert);
+            localStorage.setItem('spielLautstaerke', aktuellerWert);
+        });
+
+        // Phaser Konfiguration
+        const config = {
+            type: Phaser.AUTO,
+            parent: 'gameContainer',
+            scale: {
+                mode: Phaser.Scale.RESIZE,
+                autoCenter: Phaser.Scale.CENTER_BOTH,
+                width: 1280,
+                height: 720,
+            },
+            backgroundColor: "#000000",
+            physics: {
+                default: 'arcade'
+            },
+            scene: {
+                preload: preload,
+                create: create,
+            }
+        };
+
+        function preload() {
+            this.load.image('spielerTex', 'spielerSkin.png');
+        }
+
+        let player;
+        let cursors;
+
+        function create() {
+            player = this.physics.add.sprite(100, 300, 'spielerTex');
+            cursors = this.input.keyboard.createCursorKeys();
+        }
+
+        const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>
+
