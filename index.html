@@ -385,6 +385,8 @@
 
             this.load.image('background', 'background.jpg');
 
+            this.load.image('coin', 'coin.png');
+
         }
 
         let player;
@@ -435,6 +437,13 @@
             platform7.setScale(0.2);
             platform7.refreshBody();
 
+            // Münzen hinzufügen
+            coins = this.physics.add.sprite(200, 345, 'coin');
+            coins.setScale(0.15);
+            coins.body.setAllowGravity(false); // Münzen fallen nicht
+            coins.body.updateFromGameObject(); // Hitbox aktualisieren
+
+
             player = this.physics.add.sprite(100, 300, 'spielerTex');
             player.setCollideWorldBounds(true);
             player.setScale(0.05);
@@ -443,9 +452,15 @@
             // Kollision zwischen Spieler und Plattformen
             this.physics.add.collider(player, platforms);
 
+            // Kollision zwischen Spieler und Münzen
+            this.physics.add.overlap(player, coins);
+
+            //kolision zwischen Coin und Plattformen
+            this.physics.add.collider(coins, platforms);
+
             cursors = this.input.keyboard.createCursorKeys();
 
-            keys = this.input.keyboard.addKeys('W,A,S,D');
+            keys = this.input.keyboard.addKeys('W,A,S,D,space');
 
             this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
 
@@ -462,13 +477,15 @@
 
             if (keys.A.isDown) {
                 player.setVelocityX(-160);
+                player.flipX = true;
             } else if (keys.D.isDown) {
                 player.setVelocityX(160);
+                player.flipX = false;
             } else {
                 player.setVelocityX(0);
             }
 
-            if (keys.W.isDown && player.body.touching.down) {
+            if (keys.space.isDown && player.body.touching.down) {
                 player.setVelocityY(-330);
             }
 
