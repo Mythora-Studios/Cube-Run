@@ -26,17 +26,14 @@
             flex-direction: column;
             align-items: center;
             width: 320px;
-            z-index: 5;
+            z-index: 1;
         }
 
         .gameContainer {
             opacity: 0;
             pointer-events: none;
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            align-items: center;
             z-index: 2;
             transition: opacity 0.2s ease;
         }
@@ -63,7 +60,7 @@
             margin-bottom: 10px;
         }
 
-        .startGamme:hover, .settingButton:hover {
+        .startGamme:hover, .settingButton:hover, .restartButton:hover {
             transform: scale(1.05);
         }
 
@@ -94,7 +91,7 @@
         .color-cube-text {
             font-family: 'Montserrat', sans-serif;
             font-weight: 900;
-            font-size: 4rem;
+            font-size: 6rem;
             text-transform: uppercase;
             color: #FFDE59;
             padding: 0;
@@ -192,6 +189,18 @@
             margin-bottom: 10px;
         }
 
+        .skin-image {
+            max-width: 150px;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 20%;
+            border: 5px solid white;
+        }
+
+        .spieler {
+            border: 2px solid white;
+            border-radius: 5px;
+        }
     </style>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -212,6 +221,7 @@
 
     <div class="gameContainer" id="gameContainer">
         <button id="BackButton" class="BackButton">Back</button>
+        <div class="spieler" id="spieler"></div>
     </div>
 
     <div class="settinContainer" id="settingContainer">
@@ -358,7 +368,7 @@
             type: Phaser.AUTO,
             parent: 'gameContainer',
             scale: {
-                mode: Phaser.Scale.RESIZE,
+                mode: Phaser.Scale.FIT,
                 autoCenter: Phaser.Scale.CENTER_BOTH,
                 width: 1280,
                 height: 720,
@@ -383,9 +393,11 @@
 
             this.load.image('platform', 'Platform.png');
 
-            this.load.image('background', 'background.jpg');
+            this.load.image('background', 'background.png');
 
             this.load.image('coin', 'coin.png');
+
+            this.load.image('flag', 'flag.png')
 
         }
 
@@ -401,7 +413,7 @@
 
             this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
 
-            this.add.image(0, 0, 'background').setOrigin(0, 0).setScale(1.3);
+            this.add.image(0, 0, 'background').setOrigin(0, 0).setScale('100%');
 
             this.physics.world.setBoundsCollision(true, true, true, false);
 
@@ -437,17 +449,23 @@
             platform7.setScale(0.2);
             platform7.refreshBody();
 
+            flag = this.physics.add.sprite(1900, 400, 'flag');
+            flag.setScale(0.2);
+            flag.body.setAllowGravity(false);
+
             // Münzen hinzufügen
             coins = this.physics.add.sprite(200, 345, 'coin');
-            coins.setScale(0.15);
+            coins.setScale(0.1);
             coins.body.setAllowGravity(false); // Münzen fallen nicht
             coins.body.updateFromGameObject(); // Hitbox aktualisieren
 
 
-            player = this.physics.add.sprite(100, 300, 'spielerTex');
+            player = this.physics.add.sprite(100, 10, 'spielerTex');
             player.setCollideWorldBounds(true);
             player.setScale(0.05);
             player.body.updateFromGameObject();
+            
+        
 
             // Kollision zwischen Spieler und Plattformen
             this.physics.add.collider(player, platforms);
@@ -520,4 +538,3 @@
     </script>
 </body>
 </html>
-
