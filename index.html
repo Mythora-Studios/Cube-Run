@@ -196,11 +196,7 @@
             border-radius: 20%;
             border: 5px solid white;
         }
-
-        .spieler {
-            border: 2px solid white;
-            border-radius: 5px;
-        }
+       
     </style>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -309,9 +305,7 @@
         });
 
         skinsButton.addEventListener("click", () => {
-            startScren.style.display = "none";
-            colorCubeText.style.display = "none";
-            skinContainer.style.display = "flex";
+          window.location.href = "skins.html"
         });
 
         skinContainerBackButton.addEventListener("click", () => {
@@ -368,12 +362,8 @@
             type: Phaser.AUTO,
             parent: 'gameContainer',
             scale: {
-                mode: Phaser.Scale.FIT,
-                autoCenter: Phaser.Scale.CENTER_BOTH,
-                width: 1280,
-                height: 720,
+                mode: Phaser.Scale.ENVELOP,
             },
-            backgroundColor: "#0000GG",
             physics: {
                 default: 'arcade',
                 arcade: {
@@ -408,8 +398,8 @@
 
         function create() {
 
-            const worldWidth = 1790;
-            const worldHeight = 720;
+            const worldWidth = '200%';
+            const worldHeight = '200%';
 
             this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
 
