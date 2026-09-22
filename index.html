@@ -8,6 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
     
     <style>
+
+
         body {
             background: blue;
             display: flex;
@@ -20,6 +22,10 @@
             height: 100vh;
             overflow: hidden;
         } 
+
+        canvas {
+        display: block; /* Verhindert den kleinen Pixel-Abstand unterhalb von Canvas-Elementen */
+        }
 
         .startScren {
             display: flex;
@@ -356,9 +362,9 @@
         });
 
         skinsButton.addEventListener("click", () => {
-        startScren.style.display = 'none';
-        colorCubeText.style.display = 'none';
-        skinContainer.style.display = 'flex';
+            startScren.style.display = 'none';
+            colorCubeText.style.display = 'none';
+            skinContainer.style.display = 'flex';
         });
 
 
@@ -424,7 +430,8 @@
             type: Phaser.AUTO,
             parent: 'gameContainer',
             scale: {
-                mode: Phaser.Scale.ENVELOP,
+                mode: Phaser.Scale.RESIZE,
+                autoCenter: Phaser.Scale.CENTER_BOTH,
             },
             physics: {
                 default: 'arcade',
@@ -451,21 +458,32 @@
 
             this.load.image('flag', 'flag.png');
 
+            this.load.image('buttonLeft', 'placeholder.png');
+
+            this.load.image('buttonRight', 'placeholder.png');
+
+            this.load.image('buttonJump', 'placeholder.png')
+
         };
 
         let player;
         let cursors;
         let platforms;
+        let coins;
         let isGameOver = false;
 
         function create() {
 
-            const worldWidth = '200%';
-            const worldHeight = '200%';
+            const gameWidth = this.scale.width;
+            const gameHeight = this.scale.height;
+
+            const worldWidth = 2050;
+            const worldHeight = gameHeight;
 
             this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
 
-            this.add.image(0, 0, 'background').setOrigin(0).setScale(1);
+            let background = this.add.image(0, 0, 'background').setOrigin(0, 0);
+            background.setDisplaySize(worldWidth, worldHeight);
 
             this.physics.world.setBoundsCollision(true, true, true, false);
 
@@ -507,22 +525,38 @@
             flag.setScale(0.2);
             flag.body.setAllowGravity(false);
 
-            // Münzen hinzufügen
-            coins = this.physics.add.sprite(200, 345, 'coin');
-            coins.setScale(0.1);
-            coins.body.setAllowGravity(false); // Münzen fallen nicht
-            coins.body.updateFromGameObject(); // Hitbox aktualisieren
+            coins = this.physics.add.staticGroup();
 
+            // Münzen hinzufügen
+            const coin1 = coins.create(400, 450, 'coin');
+            coin1.setScale(0.1);
+            coin1.refreshBody();
+
+            const coin2 = coins.create(700, 450, 'coin');
+            coin2.setScale(0.1);
+            coin2.refreshBody();
+
+            const coin3 = coins.create(1000, 350, 'coin');
+            coin3.setScale(0.1);
+            coin3.refreshBody();
 
             player = this.physics.add.sprite(100, 10, 'spielerTex');
             player.setCollideWorldBounds(true);
             player.setScale(0.05);
             player.body.updateFromGameObject();
+            player.health = 100;
             
         
 
             // Kollision zwischen Spieler und Plattformen
             this.physics.add.collider(player, platforms);
+
+            this.physics.add.collider(player, flag, () => {
+                console.log("Level abgeschlossen!");
+                startScren.style.display = 'flex';
+                colorCubeText.style.display = 'block';
+                gameContainer.classList.remove('aktiv');
+            });
 
             // Kollision zwischen Spieler und Münzen
             this.physics.add.overlap(player, coins, collectCoin, null, this);
@@ -533,6 +567,42 @@
             this.physics.add.overlap(player, coins);
 
             cursors = this.input.keyboard.createCursorKeys();
+
+
+            this.moveLeft = false;
+            this.moveRight = false;
+            this.jump = false;
+
+            const buttonLeft = this.add.image(100, 0, 'buttonLeft').setOrigin(0, 0).setScrollFactor(0).setScale(0.1).setInteractive();
+
+            buttonLeft.on('pointerdown', () => {
+                this.moveLeft = true;
+            });
+            buttonLeft.on('pointerup', () => {
+                this.moveLeft = false;
+            });
+
+            const buttonRight = this.add.image(400, 0, 'buttonRight').setOrigin(0, 0).setScrollFactor(0).setScale(0.1).setInteractive();
+
+            buttonRight.on('pointerdown', () => {
+                this.moveRight = true;
+            });
+            buttonRight.on('pointerup', () => {
+                this.moveRight = false;
+            });
+
+            const buttonJump = this.add.image(650, 0, 'buttonJump').setOrigin(0, 0).setScrollFactor(0).setScale(0.1).setInteractive();
+
+            buttonJump.on('pointerdown', () => {
+                this.jump = true;
+            });
+            buttonJump.on('pointerup', () => {
+                this.jump = false;
+            });
+
+
+
+
 
             keys = this.input.keyboard.addKeys('W,A,S,D,space');
 
@@ -549,17 +619,17 @@
                 return;
             };
 
-            if (keys.A.isDown) {
+            if (keys.A.isDown || this.moveLeft) {
                 player.setVelocityX(-160);
                 player.flipX = true;
-            } else if (keys.D.isDown) {
+            } else if (keys.D.isDown || this.moveRight) {
                 player.setVelocityX(160);
                 player.flipX = false;
             } else {
                 player.setVelocityX(0);
             };
 
-            if (keys.space.isDown && player.body.touching.down) {
+            if (keys.space.isDown || this.jump && player.body.touching.down) {
                 player.setVelocityY(-330);
             };
 
