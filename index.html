@@ -576,7 +576,7 @@
             this.moveRight = false;
             this.jump = false;
 
-            const buttonLeft = this.add.image(100, 0, 'buttonLeft').setOrigin(0, 0).setScrollFactor(0).setScale(0.1).setInteractive();
+            const buttonLeft = this.add.image(100, 1000, 'buttonLeft').setOrigin(0, 0).setScrollFactor(0).setScale(0.1).setInteractive();
 
             buttonLeft.on('pointerdown', () => {
                 this.moveLeft = true;
