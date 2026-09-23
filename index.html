@@ -588,17 +588,26 @@
                 this.moveRight = true;
             });
             buttonRight.on('pointerup', () => {
+            
                 this.moveRight = false;
             });
+            buttonRight.on("pointeruot", () => {
+                this.moveRight = false;
+            })
 
             const buttonJump = this.add.image(650, 0, 'buttonJump').setOrigin(0, 0).setScrollFactor(0).setScale(0.1).setInteractive();
 
             buttonJump.on('pointerdown', () => {
+            
                 this.jump = true;
             });
             buttonJump.on('pointerup', () => {
+            
                 this.jump = false;
             });
+            buttonJump.on("pointerout", () => {
+                this.jump = false;
+            })
 
 
 
