@@ -576,7 +576,7 @@
             this.moveRight = false;
             this.jump = false;
 
-            const buttonLeft = this.add.image(100, 1000, 'buttonLeft').setOrigin(0, 0).setScrollFactor(0).setScale(0.1).setInteractive();
+            const buttonLeft = this.add.image(1, 500, 'buttonLeft').setOrigin(0, 0).setScrollFactor(0).setScale(0.1).setInteractive();
 
             buttonLeft.on('pointerdown', () => {
                 this.moveLeft = true;
@@ -585,7 +585,7 @@
                 this.moveLeft = false;
             });
 
-            const buttonRight = this.add.image(400, 0, 'buttonRight').setOrigin(0, 0).setScrollFactor(0).setScale(0.1).setInteractive();
+            const buttonRight = this.add.image(200, 500, 'buttonRight').setOrigin(0, 0).setScrollFactor(0).setScale(0.1).setInteractive();
 
             buttonRight.on('pointerdown', () => {
                 this.moveRight = true;
@@ -598,7 +598,7 @@
                 this.moveRight = false;
             })
 
-            const buttonJump = this.add.image(650, 0, 'buttonJump').setOrigin(0, 0).setScrollFactor(0).setScale(0.1).setInteractive();
+            const buttonJump = this.add.image(900, 500, 'buttonJump').setOrigin(0, 0).setScrollFactor(0).setScale(0.1).setInteractive();
 
             buttonJump.on('pointerdown', () => {
             
@@ -664,12 +664,16 @@
         };
 
         function resetGame(scene) {
+            
+
             isGameOver = false;
             console.log("Game reset");
             player.clearTint();
             player.setPosition(100, 300);
             player.setVelocity(0, 0);
             scene.physics.resume();
+            this.scene.restart();
+            coin.enableBody(true, true)
         };
 
         if (window.innerWidth < 800) {
