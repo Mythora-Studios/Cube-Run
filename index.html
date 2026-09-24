@@ -252,6 +252,16 @@
             <button class="settingButton" id="openSettingsBtn">Settings</button>
             <button class="settingButton" id="openSkinsBtn">Skins</button>
         </div>
+        <div>
+            <input type="checkbox" id="devModeCheckbox">
+            <label for="devModeCheckbox">Dev Mode</label>
+            <div id="devModeControls" style="display: none;">
+                <input type="number" id="devSpeed" placeholder="Speed standard: 160" value="300">
+                <label for="devSpeed">Speed</label>
+                <input type="checkbox" id="devFly">
+                <label for="devFly">Fly</label>
+            </div>
+        </div>
     </div>
 
     <div class="gameContainer" id="gameContainer">
@@ -299,6 +309,21 @@
         const skinContainerBackButton = document.getElementById("BackButton3");
         const gameOverScreen = document.getElementById('gameOverScreen');
         const resetButton = document.getElementById("restartButton");
+        const devModeBtn = document.getElementById("devModeBtn");
+        const devModeCheckbox = document.getElementById('devModeCheckbox')
+        const devSpeedInput = document.getElementById('devSpeed');
+        const devModeControls = document.getElementById('devModeControls');
+        const devFly = document.getElementById('devFly');
+        let speed = 160;
+        let devMode = false;
+        let player;
+        let cursors;
+        let platforms;
+        let coins;
+        let isGameOver = false;
+        let flag;
+        let keys;
+        let isFlying = false;
         
 
     //ksins Menu
@@ -385,6 +410,35 @@
             }   
         });
 
+        devModeCheckbox.addEventListener("change", (e) => {
+        devMode = e.target.checked;
+        if (devMode) {
+            devModeControls.style.display = "block";
+            const speedValue = parseFloat(devSpeedInput.value);
+            if (!isNaN(speedValue)) {
+                speed = speedValue;
+            }
+        } else {
+            devModeControls.style.display = "none";
+            speed = 160;
+        }
+        });
+
+        devSpeedInput.addEventListener("input", (e) => {
+            const speedValue = parseFloat(e.target.value);
+             if (!isNaN(speedValue) && devMode) {
+                speed = speedValue;
+            }
+        });
+
+        devFly.addEventListener("change", (e) => {
+            isFlying = e.target.checked;
+            if (player && player.body) {
+                player.body.allowGravity = !(devMode && isFlying);
+            }
+        });
+            
+
         // Musik-Funktionen
         function setupNextSong() {
             const randomIndex = Math.floor(Math.random() * playlist.length);
@@ -419,8 +473,8 @@
 
         let coinsP = 0;
 
-        function collectCoin(player, coin) {
-            coin.disableBody(true, true);
+        function collectCoin(player, coins) {
+            coins.disableBody(true, true);
             coinsP++;
             document.getElementById('coinCount').textContent = coinsP;
         };
@@ -469,11 +523,6 @@
 
         };
 
-        let player;
-        let cursors;
-        let platforms;
-        let coins;
-        let isGameOver = false;
 
         function create() {
 
@@ -548,6 +597,11 @@
             player.setScale(0.05);
             player.body.updateFromGameObject();
             player.health = 100;
+
+            // Nach player = this.physics.add.sprite(...)
+            if (devMode && isFlying) {
+                player.body.allowGravity = false;
+            }
             
         
 
@@ -559,6 +613,7 @@
                 startScren.style.display = 'flex';
                 colorCubeText.style.display = 'block';
                 gameContainer.classList.remove('aktiv');
+                this.scene.restart();
             });
 
             // Kollision zwischen Spieler und Münzen
@@ -623,7 +678,11 @@
             this.cameras.main.startFollow(player);
 
 
+
+
         };
+
+
 
         function update() {
 
@@ -632,18 +691,35 @@
             };
 
             if (keys.A.isDown || this.moveLeft) {
-                player.setVelocityX(-160);
+                player.setVelocityX(-speed);
                 player.flipX = true;
             } else if (keys.D.isDown || this.moveRight) {
-                player.setVelocityX(160);
+                player.setVelocityX(speed);
                 player.flipX = false;
             } else {
                 player.setVelocityX(0);
             };
 
-            if (keys.space.isDown || this.jump && player.body.touching.down) {
-                player.setVelocityY(-330);
-            };
+            // Vertikalsteuerung (Springen vs. Fliegen)
+            if (devMode && isFlying) {
+                // Schwerkraft im Fly-Mode ausschalten
+                player.body.allowGravity = false;
+
+                if (keys.W.isDown || keys.space.isDown || this.jump) {
+                    player.setVelocityY(-speed); // Nach oben fliegen
+                } else if (keys.S.isDown) {
+                    player.setVelocityY(speed);  // Nach unten fliegen
+                } else {
+                    player.setVelocityY(0);       // In der Luft schweben bleiben
+                }
+            } else {
+                // Normaler Modus mit Schwerkraft
+                player.body.allowGravity = true;
+
+                if ((keys.space.isDown || keys.W.isDown || this.jump) && player.body.touching.down) {
+                    player.setVelocityY(-330);
+                }
+            }
 
             if (player.y > 720) {
                 gameOver(this);
@@ -672,8 +748,8 @@
             player.setPosition(100, 300);
             player.setVelocity(0, 0);
             scene.physics.resume();
-            this.scene.restart();
-            coin.enableBody(true, true)
+            scene.scene.restart();
+            coins.enableBody(true, true)
         };
 
         if (window.innerWidth < 800) {
