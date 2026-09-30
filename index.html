@@ -11,7 +11,7 @@
 
 
         body {
-            background: blue;
+            background: black;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -21,10 +21,10 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-        } 
+            } 
 
         canvas {
-        display: block; /* Verhindert den kleinen Pixel-Abstand unterhalb von Canvas-Elementen */
+        display: block; 
         }
 
         .startScren {
@@ -131,7 +131,7 @@
             z-index: 5;
         }
 
-        .settinContainer, .skinContainer {
+        .settinContainer {
             display: none;
             position: absolute;
             top: 0;
@@ -147,6 +147,22 @@
             font-family: 'Montserrat', sans-serif;
         }
 
+        .skinContainer {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 8;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            background: transparent;
+        }
+
         .settings-content {
             display: flex;
             flex-direction: column;
@@ -156,6 +172,7 @@
             padding: 30px;
             border-radius: 20px;
             border: 3px solid white;
+        
         }
 
         .skins-content {
@@ -232,8 +249,27 @@
         }
 
 
-        .classicSkin {
-            background-color: black;
+       .classicSkin {
+            background-color: transparent; /* Entfernt den hellen Standard-Button-Hintergrund */
+            background-image: url('spielerSkin.png');
+            width: 100px;
+            height: 100px;
+            
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            cursor: pointer;
+            border: 4px solid white;
+            border-radius: 20%;
+            box-sizing: border-box; /* Verhindert, dass der Rahmen die 100px Größe vergrößert */
+            outline: none; /* Entfernt den Fokus-Rahmen beim Anklicken */
+        } 
+
+        .classicSkin .skin-image {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
        
     </style>
@@ -324,19 +360,19 @@
         let flag;
         let keys;
         let isFlying = false;
+        let isPaused = false;
+        const isMobile =
+            navigator.maxTouchPoints > 0 ||
+            window.matchMedia("(pointer: coarse)").matches;
         
 
-    //ksins Menu
-         const classicSkinButton = document.getElementById("classicSkin")
-         classicSkinButton.innerHTML = "test";
-         
-         const classicSkin = document.createElement("img")
-         classicSkin.src = "spielerSkin.png"
-         classicSkin.alt = "spielerSkin"
+    
 
+        classicSkin.addEventListener("click", () => {
+            console.log("Classic Skin ausgewählt");
+        });
 
-
-         
+                                                                                                                                                                                                                                                                                                                                                                                                                
 
          
         const regler = document.getElementById("lautstärke");
@@ -631,6 +667,8 @@
             this.moveRight = false;
             this.jump = false;
 
+            if (isMobile) {
+
             const buttonLeft = this.add.image(1, 500, 'buttonLeft').setOrigin(0, 0).setScrollFactor(0).setScale(0.1).setInteractive();
 
             buttonLeft.on('pointerdown', () => {
@@ -649,7 +687,7 @@
             
                 this.moveRight = false;
             });
-            buttonRight.on("pointeruot", () => {
+            buttonRight.on("pointerout", () => {            
                 this.moveRight = false;
             })
 
@@ -666,6 +704,12 @@
             buttonJump.on("pointerout", () => {
                 this.jump = false;
             })
+
+             console.log("Mobile");
+            
+            } else {
+                console.log("Desktop");
+            }
 
 
 
